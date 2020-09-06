@@ -482,29 +482,43 @@ const episode_ids = [
   "100313",
   "100312",
   "115749",
-  "100311"
+  "100311" // last episode
 ]
 
-// episode = null;
-
-// if (process.argv[2]) {
-//   episode = process.argv[2]
-// } else {
-//   console.log("episode no: ")
-//   getStandardInputStream().then((val) => {
-//   })
-// }
-
-async function getEpisodeFromStdin() {
+function getEpisodeFromStdin() {
   const readline = require("readline")
-  rl = readline.createInterface({input:process.stdin, output:process.stdout, terminal:true});
-  rl.question("episode no: ", (episode_no) => {
-    return episode_no;
-  })
+  rl = readline.createInterface({input:process.stdin, output:process.stdout, terminal:false});
+  return new Promise((resolve, reject) => {
+      rl.question("episode no: ", (episode_no) => {
+        rl.close();
+        resolve(episode_no);
+      });
+  });
 }
 
-async function main() {
+
+// --MAIN--
+(async function main() {
+  if (process.argv[2] == "id" && process.argv[3]) {
+	const id = process.argv[3] // only need y5w to copy.
+	for (let episodeNO in episode_ids) {
+		if (id == episode_ids[episodeNO]) {
+			console.log(+episodeNO + 1); // because indexes start at 0
+			process.exit(0)
+		}
+	}
+	// no exit therefore episode id not found.
+	exit("episode id not found", 0) // shouldnt treat it as an error i guess.
+  }
+  else if (process.argv[2] == "id" && !process.argv[3]) {
+	  exit("bad arguments", 1)
+  }
+
   episode = process.argv[2] || await getEpisodeFromStdin();
+  // check if episode no is greater than max no of episodes or < 0.
+  if (episode > episode_ids.length || episode < 0) {
+	exit("episode no out of range", 1);
+  }
   ep_id = episode_ids[episode_ids.length - Number(episode)]
 
   watch_url = url + ep_id;
@@ -515,17 +529,24 @@ async function main() {
     if (stderr) console.error(stderr);
     else {
       console.log(`command: ${command}\ncommand successful`)
-      process.exit()
+      process.exit(0)
     } 
   });
+})()
+
+// TODO : test me later.
+// should rename this to errorEncountered lol
+// also why would there be a msg in normal exit
+// make msg into error as an optional argument to 
+// be able to be used to both exit and error Exit
+function exit(msg, code) {
+	if (!msg || (code !== 0 && !code)) {// shit code 0 will make it true 
+		throw Error("bad arguments to exit function");
+	}
+	msg = `\x1b[91m${msg}\x1b[0m`;
+	console.log(msg);
+	process.exit(code);
 }
-
-main()
-// episode = process.argv[2] || await getStandardInputStream();
-
-
-
-
 
 // function getStandardInputStream(stopOnReadline) {
 //   return new Promise((resolve, reject) => {

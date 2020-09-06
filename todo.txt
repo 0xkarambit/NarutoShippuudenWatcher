@@ -1,0 +1,13 @@
+add prompt.js to list of useful js libraries
+
+
+*	add support for watching other anime(s) of the same website
+	with an analyse method
+
+*	add feature to detect filler episodes.
+*	add local cache to keep track of watched,unwatched and
+	current episode number
+
+*	improve the github discription.
+*	post about it on reddit duh
+
